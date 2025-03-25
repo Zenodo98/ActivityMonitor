@@ -25,7 +25,7 @@ namespace ActivityMonitorProgram
 
         // wenn inaktiv, die Minuten die vergehen müssen, bevor der Zustand sich von aktiv zu inaktiv ändert
         // Standart 10min. Computer gehen in 15min zu standby. 
-        static int pausePuffer = 1;
+        static int pausePuffer = 10;
 
 
         static int counter = 0;
