@@ -1,11 +1,15 @@
 ﻿
 using System;
+using System.Drawing;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Timers;
-using Microsoft.VisualBasic;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using static ActivityMonitorProgram.CursorPosition;
+
+
+
+
 
 
 
@@ -25,33 +29,46 @@ namespace ActivityMonitorProgram
             Reset,
             InactiveIdle,
             Inactive
-            
+
         }
 
         static State currentState = State.Create;
 
         // wenn inaktiv, die Minuten die vergehen müssen, bevor der Zustand sich von aktiv zu inaktiv ändert
         // Standard 10min. Computer gehen in 15min zu standby. 
-        static TimeSpan pausePuffer = new TimeSpan(00,10,00);
+        static TimeSpan pausePuffer = new TimeSpan(00, 10, 00);
 
         //automatisches Speichern, standard 5 minuten
         static int autoSaveValue = 5;
 
-       
+        //variablen
         static bool timerRunning = false;
         static bool firstLoop = true;
         static bool firstStart = true;
         static bool save = false;
-
-
+        static Point currentMouse;
         static TimeSpan firstAfkTime;
         static TimeSpan secondAfkTime;
 
-
-
+        //arrays
+        static Point[] previousMouse = new Point[1];
         static TimeSpan[] arrayActivity = new TimeSpan[4];
 
-        
+
+
+
+        // gibt true zurück, wenn Mauspositionen ungleich sind
+        static bool differentMousePosition(Point pos1, Point pos2)
+        {
+            if(pos1 == pos2)
+            {
+                return false;
+            }
+            return true;
+        }
+
+
+
 
         // Gibt true zurück, wenn eine Taste gedrückt wird
         static bool DetectKeys()
@@ -92,7 +109,7 @@ namespace ActivityMonitorProgram
             keys[28] = 0x58;
             keys[29] = 0x59;
             keys[30] = 0x5A;
-            
+
             foreach (int key in keys)
             {
                 if (GetAsyncKeyState(key) != 0)
@@ -103,25 +120,23 @@ namespace ActivityMonitorProgram
             return false;
         }
 
-        // der Timer
+
+
+
+        // die Timer
+        //Timer zum speichern der Blöcke
         static void StartTimer()
         {
-
-            
             System.Timers.Timer timer;
-            timer = new System.Timers.Timer(1000*60*autoSaveValue);
-           
+            timer = new System.Timers.Timer(1000 * 60 * autoSaveValue);
 
             // gibt dem Timer eine Anweisung
             timer.Elapsed += TimerElapsed;
             timer.Enabled = true;
             timer.AutoReset = true;
-          
-            
         }
 
-
-        //Wenn Timer abläuft wird diese Methode ausgeführt
+        //Wenn Timer abläuft werden die Daten in einer CSV-Datei gespeichert
         private static void TimerElapsed(object source, ElapsedEventArgs e)
         {
             Console.WriteLine("Start: " + arrayActivity[0]);
@@ -132,6 +147,31 @@ namespace ActivityMonitorProgram
             save = true;
         }
 
+
+        //Jede Sekunde wird Mausposition gespeichert
+        static void StartMousePosTimer()
+        {
+            System.Timers.Timer timer;
+            timer = new System.Timers.Timer(1000);
+
+            // gibt dem Timer eine Anweisung
+            timer.Elapsed += MousePosTimerElapsed;
+            timer.Enabled = true;
+            timer.AutoReset = true;
+
+        }
+
+
+        //Wenn Timer abläuft wird diese Methode ausgeführt
+        private static void MousePosTimerElapsed(object source, ElapsedEventArgs e)
+        {
+            previousMouse[0] = GetCursorPosition();
+        }
+
+
+
+
+        //Funktion zum speichern der Daten
         static void Save(DateTime date, string path)
         {
             removeCsvLine(path);
@@ -143,9 +183,20 @@ namespace ActivityMonitorProgram
 
         }
 
+
+
+
+        //subtrahiert alte Zeit von neuer Zeit
+        static TimeSpan difference(TimeSpan time1, TimeSpan time2)
+        {
+            return time1 - time2;
+        }
+
+
+
+
         //Da der Dateiname das Datum benutzt, wird automatisch jeden Tag eine neue csv-Datei erstellt
         //csv-dateien können von jeder datenbank geöffnet werden
-
         static void createFile(string path)
         {
             //Wenn Dateiname nicht existiert, dann wird die Bedienung ausgeführt
@@ -154,10 +205,8 @@ namespace ActivityMonitorProgram
                 using (System.IO.StreamWriter file = new System.IO.StreamWriter(@path, true))
                 {
                     file.Write("Datum,Anfang,Ende,Pause,Gesamtzeit");
-                    
                 }
             }
-
             if (firstLoop)
             {
                 firstLoop = true;
@@ -166,20 +215,20 @@ namespace ActivityMonitorProgram
 
 
 
-        static TimeSpan difference(TimeSpan time1, TimeSpan time2)
+
+        //Funktion zum schreiben der CSV-Datei
+        static void WriteCsv(string path, string content)
         {
-            return  time1 - time2;
+            using (System.IO.StreamWriter file = new System.IO.StreamWriter(@path, true))
+            {
+                file.Write(content + ",");
+            }
         }
 
-        static void WriteCsv(string path, string content) 
-        {
 
-                using (System.IO.StreamWriter file = new System.IO.StreamWriter(@path, true))
-                {   
-                    file.Write(content + ",");
-                }
-        }
 
+
+        //Funktion zum erstellen einer leeren Zeile
         static void WriteCsvLine(string path)
         {
 
@@ -189,108 +238,114 @@ namespace ActivityMonitorProgram
             }
         }
 
-        static void removeCsvLine(string path) { 
+
+
+
+        //funktion zum entfernen einer Zeile
+        static void removeCsvLine(string path)
+        {
             var lines = System.IO.File.ReadAllLines(path);
             System.IO.File.WriteAllLines(path, lines.Take(lines.Length - 1).ToArray());
         }
 
 
-        //erstellt neue Datei
 
-        // create -> Active -> reset -> activeidle -> inactiv -> inactividle ->create
+
+        //create -> Active -> reset -> activeidle -> inactiv -> inactividle ->create
+
+        //erstellt neue Datei
         static void Create(DateTime date, string path, TimeSpan time)
         {
-
             createFile(path);
-
             WriteCsvLine(path);
+
             if (firstStart)
-            {   
+            {
                 firstStart = false;
                 WriteCsvLine(path);
             }
-            
+
 
             arrayActivity[1] = time;
 
-           
             currentState = State.Active;
 
         }
 
 
+
+        //timer reset
         static void Reset(TimeSpan time)
         {
-
             secondAfkTime = time;
             currentState = State.ActiveIdle;
-
-
         }
+
+
+
 
         static void Active(string path, TimeSpan time)
         {
             arrayActivity[0] = time;
-
-
-            
-            
-            
-
             currentState = State.Reset;
         }
+
+
+
 
         static void Inactive(TimeSpan time)
         {
             arrayActivity[1] = time;
-
             currentState = State.InactiveIdle;
         }
 
-        static void ActiveIdle(DateTime date, string path, TimeSpan time) 
+
+
+
+        
+        static void ActiveIdle(DateTime date, string path, TimeSpan time)
         {
-
-
+            
             if (!File.Exists(@path))
             {
                 currentState = State.Create;
             }
 
             arrayActivity[0] = time;
-            
             arrayActivity[3] = difference(arrayActivity[0], arrayActivity[1]);
-            
+
 
             if (save)
             {
-
-                Save(date,path);
-
+                Save(date, path);
             }
 
             firstAfkTime = time;
 
             TimeSpan afkTime = difference(firstAfkTime, secondAfkTime);
-            TimeSpan.Compare(afkTime,pausePuffer);
-
+            TimeSpan.Compare(afkTime, pausePuffer);
+            currentMouse = GetCursorPosition();
 
             //Wenn Taste gedrückt wird, dann reset
-            if (DetectKeys())
+            if (DetectKeys() || differentMousePosition(previousMouse[0], currentMouse))
             {
                 currentState = State.Reset;
             }
 
-
-            if (!DetectKeys() && TimeSpan.Compare(afkTime, pausePuffer) == 1)
+            if (TimeSpan.Compare(afkTime, pausePuffer) == 1)
             {
+                Console.WriteLine("switch to inactive");
                 arrayActivity[3] = difference(arrayActivity[0], arrayActivity[1]).Add(-pausePuffer);
-                currentState = State.Inactive;
-                
-            }
+                currentState = State.Inactive;   
+            }  
         }
 
+
+
+
         static void InactiveIdle(DateTime date, string path, TimeSpan time)
-        {   
+        {
+            currentMouse = GetCursorPosition();
             firstLoop = false;
 
             arrayActivity[1] = time;
@@ -299,7 +354,6 @@ namespace ActivityMonitorProgram
             if (save)
             {
                 Save(date, path);
-
             }
 
             if (!File.Exists(@path))
@@ -307,14 +361,13 @@ namespace ActivityMonitorProgram
                 currentState = State.Create;
             }
 
-            if (DetectKeys())
+            if (DetectKeys() || differentMousePosition(previousMouse[0], currentMouse))
             {
+                Console.WriteLine("switch to active");
                 Save(date, path);
                 WriteCsvLine(path);
                 arrayActivity[2] = TimeSpan.Zero;
                 currentState = State.Create;
-                
-
             }
         }
 
@@ -329,7 +382,6 @@ namespace ActivityMonitorProgram
             {
                 await Task.Delay(300);
 
-
                 TimeSpan time = DateTime.Now.TimeOfDay;
                 time = TimeSpan.FromSeconds(Math.Round(time.TotalSeconds));
 
@@ -337,20 +389,23 @@ namespace ActivityMonitorProgram
 
                 string path = "Data" + "\\" + date.ToString("dd-MM-yyyy") + ".csv";
 
-                
+
+                //startet die Timer
+
                 if (!timerRunning)
                 {
                     StartTimer();
+                    StartMousePosTimer();
                     timerRunning = true;
                 }
 
-                
+
 
                 //Switch-Statement um zwischen den Zuständen zu wechseln
                 switch (currentState)
                 {
                     case State.Create:
-                        Create(date,path,time);
+                        Create(date, path, time);
                         break;
                     case State.ActiveIdle:
                         ActiveIdle(date, path, time);
@@ -372,5 +427,28 @@ namespace ActivityMonitorProgram
 
             }
         }
-    }    
+    }
+
+   
+    internal static class CursorPosition
+    {
+        [StructLayout(LayoutKind.Sequential)]
+        public struct PointInter
+        {
+            public int X;
+            public int Y;
+            public static explicit operator Point(PointInter point) => new Point(point.X, point.Y);
+        }
+
+        [DllImport("user32.dll")]
+        public static extern bool GetCursorPos(out PointInter lpPoint);
+
+        // die Methode gibt die Maus Position zurück
+        public static Point GetCursorPosition()
+        {
+            PointInter lpPoint;
+            GetCursorPos(out lpPoint);
+            return (Point)lpPoint;
+        }
+    }
 }
