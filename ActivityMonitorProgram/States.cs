@@ -120,7 +120,7 @@ namespace ActivityMonitorProgram
         }
 
         /// <summary>
-        /// Schaut ob der Nutzer aktiv ist, wenn nicht wechselt zu Inaktiv-Zustand.
+        /// Schaut ob der Nutzer inaktiv ist, wenn nicht wechselt zu aktiv-Zustand.
         /// </summary>
         /// <param name="date">Systemdatum</param>
         /// <param name="path">Pfadverzeichnis</param>
