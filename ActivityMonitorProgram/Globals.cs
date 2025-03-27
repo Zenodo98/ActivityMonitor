@@ -9,9 +9,6 @@ namespace ActivityMonitorProgram
 {
     internal class Globals
     {
-
-
-
         //variablen
         public static bool timerRunning = false;
         public static bool firstLoop = true;
