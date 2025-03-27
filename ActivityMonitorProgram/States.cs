@@ -18,6 +18,17 @@ namespace ActivityMonitorProgram
             Inactive,
         }
 
+        //variablen
+        public static bool firstLoop = true;
+        public static bool firstStart = true;
+        public static TimeSpan firstAfkTime;
+        public static TimeSpan secondAfkTime;
+
+        public static TimeSpan startTime;
+        public static TimeSpan endTime;
+        public static TimeSpan pauseTime;
+        public static TimeSpan workTime;
+
         public static State currentState = State.Create;
 
         /// <summary>
@@ -43,12 +54,12 @@ namespace ActivityMonitorProgram
         {
             ManageCSV.CreateFile(path);
 
-            if (Globals.firstStart)
+            if (States.firstStart)
             {
-                Globals.firstStart = false;
+                States.firstStart = false;
             }
 
-            Globals.endTime = time;
+            States.endTime = time;
 
             currentState = State.Reset;
         }
@@ -60,7 +71,7 @@ namespace ActivityMonitorProgram
         /// <param name="time">Systemzeit</param>
         public static void Reset(TimeSpan time)
         {
-            Globals.secondAfkTime = time;
+            States.secondAfkTime = time;
             currentState = State.Active;
         }
 
@@ -78,24 +89,24 @@ namespace ActivityMonitorProgram
                 currentState = State.Create;
             }
 
-            Globals.startTime = time;
-            Globals.workTime = Difference(Globals.startTime, Globals.endTime);
+            States.startTime = time;
+            States.workTime = Difference(States.startTime, States.endTime);
 
 
-            if (Globals.save)
+            if (ManageCSV.save)
             {
                 ManageCSV.Save(date, path);
-                Globals.save = false;
+                ManageCSV.save = false;
             }
 
-            Globals.firstAfkTime = time;
+            States.firstAfkTime = time;
 
-            TimeSpan afkTime = Difference(Globals.firstAfkTime, Globals.secondAfkTime);
+            TimeSpan afkTime = Difference(States.firstAfkTime, States.secondAfkTime);
             TimeSpan.Compare(afkTime, Settings.pausePuffer);
-            Globals.currentMouse = CursorPosition.GetCursorPosition();
+            CursorPosition.currentMouse = CursorPosition.GetCursorPosition();
 
             //Wenn Taste gedrückt wird, dann reset
-            if (CursorPosition.DifferentMousePosition(Globals.previousMouse, Globals.currentMouse))
+            if (CursorPosition.DifferentMousePosition(CursorPosition.previousMouse, CursorPosition.currentMouse))
             {
                 currentState = State.Reset;
             }
@@ -103,7 +114,7 @@ namespace ActivityMonitorProgram
             if (TimeSpan.Compare(afkTime, Settings.pausePuffer) == 1)
             {
                 Console.WriteLine("switch to inactive");
-                Globals.workTime = Difference(Globals.startTime, Globals.endTime).Add(-Settings.pausePuffer);
+                States.workTime = Difference(States.startTime, States.endTime).Add(-Settings.pausePuffer);
                 currentState = State.Inactive;
             }
         }
@@ -116,18 +127,18 @@ namespace ActivityMonitorProgram
         /// <param name="time">Systemzeit</param>
         public static void Inactive(DateTime date, string path, TimeSpan time)
         {
-            Globals.currentMouse = CursorPosition.GetCursorPosition();
+            CursorPosition.currentMouse = CursorPosition.GetCursorPosition();
 
-            Globals.firstLoop = false;
+            States.firstLoop = false;
 
-            Globals.endTime = time;
+            States.endTime = time;
 
-            Globals.pauseTime = Difference(Globals.endTime, Globals.startTime).Add(Settings.pausePuffer);
+            States.pauseTime = Difference(States.endTime, States.startTime).Add(Settings.pausePuffer);
 
-            if (Globals.save)
+            if (ManageCSV.save)
             {
                 ManageCSV.Save(date, path);
-                Globals.save = false;
+                ManageCSV.save = false;
             }
 
             if (!File.Exists(@path))
@@ -135,13 +146,13 @@ namespace ActivityMonitorProgram
                 currentState = State.Create;
             }
 
-            if (CursorPosition.DifferentMousePosition(Globals.previousMouse, Globals.currentMouse))
+            if (CursorPosition.DifferentMousePosition(CursorPosition.previousMouse, CursorPosition.currentMouse))
             {
                 Console.WriteLine("switch to active");
                 ManageCSV.Save(date, path);
                 ManageCSV.WriteCsvLine(path);
                 ManageCSV.WriteCsvLine(path);
-                Globals.pauseTime = TimeSpan.Zero;
+                States.pauseTime = TimeSpan.Zero;
                 currentState = State.Create;
             }
         }

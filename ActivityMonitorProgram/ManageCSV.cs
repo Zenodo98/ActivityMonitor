@@ -8,6 +8,7 @@ namespace ActivityMonitorProgram
 {
     internal class ManageCSV
     {
+        public static bool save = false;
         /// <summary>
         /// Die Methode erstellt eine CSV-Datei und schreibt "Datum,Anfang,Ende,Pause,Gesamtzeit" darein.
         /// </summary>
@@ -25,9 +26,9 @@ namespace ActivityMonitorProgram
                 }
             }
 
-            if (Globals.firstLoop)
+            if (States.firstLoop)
             {
-                Globals.firstLoop = true;
+                States.firstLoop = true;
             }
         }
 

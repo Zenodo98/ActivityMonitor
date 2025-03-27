@@ -10,6 +10,9 @@ namespace ActivityMonitorProgram
 {
     internal static class CursorPosition
     {
+        public static Point previousMouse;
+        public static Point currentMouse;
+
         [StructLayout(LayoutKind.Sequential)]
         public struct PointInter
         {

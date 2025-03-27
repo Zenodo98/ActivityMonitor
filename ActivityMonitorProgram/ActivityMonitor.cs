@@ -28,11 +28,11 @@ namespace ActivityMonitorProgram
                 string path = "Data" + "\\" + date.ToString("dd-MM-yyyy") + ".csv";
 
                 //startet die Timer
-                if (!Globals.timerRunning)
+                if (!Timer.timerRunning)
                 {
                     Timer.StartTimer();
                     Timer.StartMousePosTimer();
-                    Globals.timerRunning = true;
+                    Timer.timerRunning = true;
                 }
 
 

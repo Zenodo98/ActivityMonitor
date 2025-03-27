@@ -9,6 +9,8 @@ namespace ActivityMonitorProgram
 {
     internal class Timer
     {
+        public static bool timerRunning = false;
+
         /// <summary>
         /// Timer für das automatische Speichern der Blöcke.
         /// </summary>
@@ -26,12 +28,12 @@ namespace ActivityMonitorProgram
         
         private static void TimerElapsed(object source, ElapsedEventArgs e)
         {
-            Console.WriteLine("Start: " + Globals.startTime);
-            Console.WriteLine("End: " + Globals.endTime);
-            Console.WriteLine("BreakTime: " + Globals.pauseTime);
-            Console.WriteLine("WorkTime: " + Globals.workTime);
+            Console.WriteLine("Start: " + States.startTime);
+            Console.WriteLine("End: " + States.endTime);
+            Console.WriteLine("BreakTime: " + States.pauseTime);
+            Console.WriteLine("WorkTime: " + States.workTime);
             Console.WriteLine();
-            Globals.save = true;
+            ManageCSV.save = true;
         }
 
 
@@ -53,7 +55,7 @@ namespace ActivityMonitorProgram
 
         private static void MousePosTimerElapsed(object source, ElapsedEventArgs e)
         {
-            Globals.previousMouse = CursorPosition.GetCursorPosition();
+            CursorPosition.previousMouse = CursorPosition.GetCursorPosition();
         }
 
     }
