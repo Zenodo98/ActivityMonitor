@@ -9,18 +9,10 @@ namespace ActivityMonitorProgram
 {
     internal class Globals
     {
-        //Zustände
-        public enum State
-        {
-            Create,
-            Active,
-            Reset,
-            Inactive,
-        }
+
 
 
         //variablen
-        public static State currentState = State.Create;
         public static bool timerRunning = false;
         public static bool firstLoop = true;
         public static bool firstStart = true;

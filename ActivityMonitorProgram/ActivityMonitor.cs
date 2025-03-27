@@ -38,18 +38,18 @@ namespace ActivityMonitorProgram
 
 
                 //Switch-Statement um zwischen den Zuständen zu wechseln
-                switch (Globals.currentState)
+                switch (States.currentState)
                 {
-                    case Globals.State.Create:
+                    case States.State.Create:
                         States.Create(date, path, time);
                         break;
-                    case Globals.State.Active:
+                    case States.State.Active:
                         States.Active(date, path, time);
                         break;
-                    case Globals.State.Reset:
+                    case States.State.Reset:
                         States.Reset(time);
                         break;
-                    case Globals.State.Inactive:
+                    case States.State.Inactive:
                         States.Inactive(date, path, time);
                         break;
                 }

@@ -9,6 +9,16 @@ namespace ActivityMonitorProgram
 {
     internal class States
     {
+        //Zustände
+        public enum State
+        {
+            Create,
+            Active,
+            Reset,
+            Inactive,
+        }
+
+        public static State currentState = State.Create;
 
         /// <summary>
         /// Die Methode subtrahiert alte Zeit von neuer Zeit
@@ -20,8 +30,6 @@ namespace ActivityMonitorProgram
         {
             return time1 - time2;
         }
-
-        //create -> Active -> reset -> activeidle -> inactiv -> inactividle ->create
 
 
         /// <summary>
@@ -42,7 +50,7 @@ namespace ActivityMonitorProgram
 
             Globals.endTime = time;
 
-            Globals.currentState = Globals.State.Reset;
+            currentState = State.Reset;
         }
 
 
@@ -53,7 +61,7 @@ namespace ActivityMonitorProgram
         public static void Reset(TimeSpan time)
         {
             Globals.secondAfkTime = time;
-            Globals.currentState = Globals.State.Active;
+            currentState = State.Active;
         }
 
         /// <summary>
@@ -67,7 +75,7 @@ namespace ActivityMonitorProgram
 
             if (!File.Exists(@path))
             {
-                Globals.currentState = Globals.State.Create;
+                currentState = State.Create;
             }
 
             Globals.startTime = time;
@@ -89,14 +97,14 @@ namespace ActivityMonitorProgram
             //Wenn Taste gedrückt wird, dann reset
             if (CursorPosition.DifferentMousePosition(Globals.previousMouse, Globals.currentMouse))
             {
-                Globals.currentState = Globals.State.Reset;
+                currentState = State.Reset;
             }
 
             if (TimeSpan.Compare(afkTime, Settings.pausePuffer) == 1)
             {
                 Console.WriteLine("switch to inactive");
                 Globals.workTime = Difference(Globals.startTime, Globals.endTime).Add(-Settings.pausePuffer);
-                Globals.currentState = Globals.State.Inactive;
+                currentState = State.Inactive;
             }
         }
 
@@ -124,7 +132,7 @@ namespace ActivityMonitorProgram
 
             if (!File.Exists(@path))
             {
-                Globals.currentState = Globals.State.Create;
+                currentState = State.Create;
             }
 
             if (CursorPosition.DifferentMousePosition(Globals.previousMouse, Globals.currentMouse))
@@ -134,7 +142,7 @@ namespace ActivityMonitorProgram
                 ManageCSV.WriteCsvLine(path);
                 ManageCSV.WriteCsvLine(path);
                 Globals.pauseTime = TimeSpan.Zero;
-                Globals.currentState = Globals.State.Create;
+                currentState = State.Create;
             }
         }
     }
