@@ -56,7 +56,7 @@ namespace ActivityMonitorProgram
         public static void Create(string path, TimeSpan time)
         {
             ManageCSV.CreateFile(path);
-            currentState = State.SetStartTime;
+            
 
             secondAfkTime = time;
 
@@ -66,6 +66,8 @@ namespace ActivityMonitorProgram
             lastEndTime = TimeSpan.Zero ;
             pauseTime = TimeSpan.Zero ;
             workTime = TimeSpan.Zero ;
+
+            currentState = State.SetStartTime;
         }
 
 
@@ -161,13 +163,15 @@ namespace ActivityMonitorProgram
             }
             else if (TimeSpan.Compare(afkTime, Settings.pausePuffer) == 1)
             {
+                workTime = workTime.Add(-Settings.pausePuffer);
+
                 Console.WriteLine();
                 Console.WriteLine("FirstStartTime: " + firstStartTime);
                 Console.WriteLine("LastStartTime: " + lastStartTime);
                 Console.WriteLine("WorkTime: " + workTime);
                 Console.WriteLine("switch to inactive");
 
-                workTime = Difference(lastStartTime, firstStartTime).Add(-Settings.pausePuffer);
+                
                 CursorPosition.previousMouseX = CursorPosition.GetCursorPosition().X;
                 CursorPosition.previousMouseY = CursorPosition.GetCursorPosition().Y;
                 currentState = State.SetEndTime;
@@ -200,7 +204,8 @@ namespace ActivityMonitorProgram
             //wird fürs ausrechnen der Pausenzeit gebraucht
             lastEndTime = time;
 
-            pauseTime = Difference(lastEndTime, firstEndTime).Add(Settings.pausePuffer);
+            pauseTime = Difference(lastEndTime, firstEndTime);
+            
 
 
             //wenn datei nicht vorhanden wechselt zu create
@@ -213,13 +218,20 @@ namespace ActivityMonitorProgram
             }
             else if (time >= new TimeSpan(23, 59, 00) & time <= new TimeSpan(23, 59, 59))
             {
+                pauseTime = pauseTime.Add(Settings.pausePuffer);
+                
+
                 ManageCSV.RemoveCsvLine(path);
                 ManageCSV.Save(date, path, firstStartTime, lastEndTime, pauseTime, workTime);
                 currentState = State.Create;
             }
-            else if (CursorPosition.currentMouseX <= CursorPosition.previousMouseX - 50 || CursorPosition.currentMouseX >= CursorPosition.previousMouseX + 50 &
-                CursorPosition.currentMouseY <= CursorPosition.previousMouseY - 50 || CursorPosition.currentMouseY >= CursorPosition.previousMouseY + 50)
+            else if (CursorPosition.currentMouseX <= CursorPosition.previousMouseX - 80 || CursorPosition.currentMouseX >= CursorPosition.previousMouseX + 80 &
+                CursorPosition.currentMouseY <= CursorPosition.previousMouseY - 80 || CursorPosition.currentMouseY >= CursorPosition.previousMouseY + 80)
             {
+                
+                pauseTime = pauseTime.Add(Settings.pausePuffer);
+                
+
                 Console.WriteLine();
                 Console.WriteLine("firstEndTime: " + firstEndTime);
                 Console.WriteLine("lastEndTime: " + lastEndTime);
@@ -230,11 +242,13 @@ namespace ActivityMonitorProgram
                 ManageCSV.Save(date, path, firstStartTime, lastEndTime, pauseTime, workTime);
                 ManageCSV.WriteCsvLine(path);
                 ManageCSV.WriteCsvLine(path);
-                pauseTime = TimeSpan.Zero;
                 currentState = State.Create;
             }
             else if (ManageCSV.save)
             {
+                pauseTime = pauseTime.Add(Settings.pausePuffer);
+                
+
                 Console.WriteLine();
                 Console.WriteLine("firstEndTime: " + firstEndTime);
                 Console.WriteLine("lastEndTime: " + lastEndTime);
