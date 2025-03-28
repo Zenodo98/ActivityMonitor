@@ -42,11 +42,17 @@ namespace ActivityMonitorProgram
                     case States.State.Create:
                         States.Create(path, time);
                         break;
+                    case States.State.SetStartTime:
+                        States.SetStartTime(time);
+                        break;
                     case States.State.Active:
                         States.Active(date, path, time);
                         break;
                     case States.State.Reset:
                         States.Reset(time);
+                        break;
+                    case States.State.SetEndTime:
+                        States.SetEndTime(time);
                         break;
                     case States.State.Inactive:
                         States.Inactive(date, path, time);

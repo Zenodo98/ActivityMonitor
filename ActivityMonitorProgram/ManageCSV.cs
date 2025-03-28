@@ -75,8 +75,8 @@ namespace ActivityMonitorProgram
         {
             ManageCSV.RemoveCsvLine(path);
             ManageCSV.WriteCsv(path, date.ToString("dd-MM-yyyy"));
-            ManageCSV.WriteCsv(path, States.startTime.ToString());
-            ManageCSV.WriteCsv(path, States.endTime.ToString());
+            ManageCSV.WriteCsv(path, States.firstStartTime.ToString());
+            ManageCSV.WriteCsv(path, States.firstEndTime.ToString());
             ManageCSV.WriteCsv(path, States.pauseTime.ToString());
             ManageCSV.WriteCsv(path, States.workTime.ToString());
         }
