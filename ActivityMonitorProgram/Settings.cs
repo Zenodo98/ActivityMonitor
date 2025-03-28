@@ -10,9 +10,9 @@ namespace ActivityMonitorProgram
     {
         // wenn inaktiv, die Minuten die vergehen müssen, bevor der Zustand sich von aktiv zu inaktiv ändert
         // Standard 10min. Computer gehen in 15min zu standby. 
-        public static TimeSpan pausePuffer = new TimeSpan(00, 02, 00);
+        public static TimeSpan pausePuffer = new TimeSpan(00, 10, 00);
 
         //automatisches Speichern, standard jede 5 minuten
-        public static int autoSaveValue = 1;
+        public static int autoSaveValue = 5;
     }
 }

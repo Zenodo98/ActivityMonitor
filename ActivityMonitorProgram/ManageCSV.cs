@@ -71,14 +71,17 @@ namespace ActivityMonitorProgram
         /// </summary>
         /// <param name="date">heutige Datum</param>
         /// <param name="path">Das Pfadverzeichnis der Datei</param>
-        public static void Save(DateTime date, string path)
+        /// <param name="startTime"></param>
+        /// <param name="endTime"></param>
+        /// <param name="pauseTime"></param>
+        /// <param name="workTime"></param>
+        public static void Save(DateTime date, string path, TimeSpan startTime, TimeSpan endTime, TimeSpan pauseTime, TimeSpan workTime )
         {
-            ManageCSV.RemoveCsvLine(path);
             ManageCSV.WriteCsv(path, date.ToString("dd-MM-yyyy"));
-            ManageCSV.WriteCsv(path, States.firstStartTime.ToString());
-            ManageCSV.WriteCsv(path, States.firstEndTime.ToString());
-            ManageCSV.WriteCsv(path, States.pauseTime.ToString());
-            ManageCSV.WriteCsv(path, States.workTime.ToString());
+            ManageCSV.WriteCsv(path, startTime.ToString());
+            ManageCSV.WriteCsv(path, endTime.ToString());
+            ManageCSV.WriteCsv(path, pauseTime.ToString());
+            ManageCSV.WriteCsv(path, workTime.ToString());
         }
     }
 }
