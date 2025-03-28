@@ -36,12 +36,11 @@ namespace ActivityMonitorProgram
                 }
 
 
-
                 //Switch-Statement um zwischen den Zuständen zu wechseln
                 switch (States.currentState)
                 {
                     case States.State.Create:
-                        States.Create(date, path, time);
+                        States.Create(path, time);
                         break;
                     case States.State.Active:
                         States.Active(date, path, time);

@@ -9,6 +9,17 @@ namespace ActivityMonitorProgram
 {
     internal class States
     {
+        
+        public static TimeSpan firstAfkTime;
+        public static TimeSpan secondAfkTime;
+        public static TimeSpan startTime;
+        public static TimeSpan endTime;
+        public static TimeSpan pauseTime;
+        public static TimeSpan workTime;
+
+        public static State currentState = State.Create;
+
+
         //Zustände
         public enum State
         {
@@ -18,18 +29,6 @@ namespace ActivityMonitorProgram
             Inactive,
         }
 
-        //variablen
-        public static bool firstLoop = true;
-        public static bool firstStart = true;
-        public static TimeSpan firstAfkTime;
-        public static TimeSpan secondAfkTime;
-
-        public static TimeSpan startTime;
-        public static TimeSpan endTime;
-        public static TimeSpan pauseTime;
-        public static TimeSpan workTime;
-
-        public static State currentState = State.Create;
 
         /// <summary>
         /// Die Methode subtrahiert alte Zeit von neuer Zeit
@@ -50,14 +49,9 @@ namespace ActivityMonitorProgram
         /// <param name="date">Systemdatum</param>
         /// <param name="path">Pfadverzeichnis</param>
         /// <param name="time">Systemzeit</param>
-        public static void Create(DateTime date, string path, TimeSpan time)
+        public static void Create(string path, TimeSpan time)
         {
             ManageCSV.CreateFile(path);
-
-            if (States.firstStart)
-            {
-                States.firstStart = false;
-            }
 
             States.endTime = time;
 
@@ -66,11 +60,12 @@ namespace ActivityMonitorProgram
 
 
         /// <summary>
-        /// Der Reset-Zustand zurücksetzen des Zeitzählers gedacht. Wechselt zurück zu Aktiv-Zustand
+        /// Der Reset-Zustand zurücksetzen des Zeitzählers der afk-Zeit gedacht. Wechselt zurück zu Aktiv-Zustand
         /// </summary>
         /// <param name="time">Systemzeit</param>
         public static void Reset(TimeSpan time)
-        {
+        {   
+            //zweite Zeit für die Difference Methode
             States.secondAfkTime = time;
             currentState = State.Active;
         }
@@ -83,37 +78,59 @@ namespace ActivityMonitorProgram
         /// <param name="time">Systemzeit</param>
         public static void Active(DateTime date, string path, TimeSpan time)
         {
+            CursorPosition.currentMouse = CursorPosition.GetCursorPosition();
+
+            States.startTime = time;
+
+            //zweite Zeit für die Difference Methode
+            States.firstAfkTime = time;
+
+            //Berechnet die Arbeitszeit
+            States.workTime = Difference(States.startTime, States.endTime);
+
+            //Zeitzähler
+            TimeSpan afkTime = Difference(States.firstAfkTime, States.secondAfkTime);
+
+            //vergleicht die afk-Zeit mit der Pufferzeit
+            TimeSpan.Compare(afkTime, Settings.pausePuffer);
+
+
+            //wenn datei nicht vorhanden wechselt zu create
+            //speichert, wechselt zu create, wenn 23:59
+            //speichert automatisch, wenn Zeit
+            //wenn Mausbewegung, wechsel zu reset
+            //wenn afk zeit höher als Puffer, wechsel zu Inaktiv
 
             if (!File.Exists(@path))
             {
                 currentState = State.Create;
             }
-
-            States.startTime = time;
-            States.workTime = Difference(States.startTime, States.endTime);
-
-
-            if (ManageCSV.save)
+            else if (time >= new TimeSpan(23,59,00) & time <= new TimeSpan(23,59,59))
             {
+                ManageCSV.Save(date, path);
+                currentState = State.Create;
+            }
+            else if (ManageCSV.save)
+            {
+                Console.WriteLine();
+                Console.WriteLine("BreakTime: " + States.pauseTime);
+                Console.WriteLine("WorkTime: " + States.workTime);
+                Console.WriteLine("auto saved while activ");
+
                 ManageCSV.Save(date, path);
                 ManageCSV.save = false;
             }
-
-            States.firstAfkTime = time;
-
-            TimeSpan afkTime = Difference(States.firstAfkTime, States.secondAfkTime);
-            TimeSpan.Compare(afkTime, Settings.pausePuffer);
-            CursorPosition.currentMouse = CursorPosition.GetCursorPosition();
-
-            //Wenn Taste gedrückt wird, dann reset
-            if (CursorPosition.DifferentMousePosition(CursorPosition.previousMouse, CursorPosition.currentMouse))
+            else if (CursorPosition.DifferentMousePosition(CursorPosition.previousMouse, CursorPosition.currentMouse))
             {
                 currentState = State.Reset;
             }
-
-            if (TimeSpan.Compare(afkTime, Settings.pausePuffer) == 1)
+            else if (TimeSpan.Compare(afkTime, Settings.pausePuffer) == 1)
             {
+                Console.WriteLine();
+                Console.WriteLine("BreakTime: " + States.pauseTime);
+                Console.WriteLine("WorkTime: " + States.workTime);
                 Console.WriteLine("switch to inactive");
+
                 States.workTime = Difference(States.startTime, States.endTime).Add(-Settings.pausePuffer);
                 currentState = State.Inactive;
             }
@@ -129,31 +146,46 @@ namespace ActivityMonitorProgram
         {
             CursorPosition.currentMouse = CursorPosition.GetCursorPosition();
 
-            States.firstLoop = false;
-
             States.endTime = time;
 
             States.pauseTime = Difference(States.endTime, States.startTime).Add(Settings.pausePuffer);
 
-            if (ManageCSV.save)
-            {
-                ManageCSV.Save(date, path);
-                ManageCSV.save = false;
-            }
 
+            //wenn datei nicht vorhanden wechselt zu create
+            //speichert, wechselt zu create, wenn 23:59
+            //wenn Mausbewegung, dann wechsel zu create
+            //speichert automatisch, wenn Zeit
             if (!File.Exists(@path))
             {
                 currentState = State.Create;
             }
-
-            if (CursorPosition.DifferentMousePosition(CursorPosition.previousMouse, CursorPosition.currentMouse))
+            else if (time >= new TimeSpan(23, 59, 00) & time <= new TimeSpan(23, 59, 59))
             {
+                ManageCSV.Save(date, path);
+                currentState = State.Create;
+            }
+            else if (CursorPosition.DifferentMousePosition(CursorPosition.previousMouse, CursorPosition.currentMouse))
+            {
+                Console.WriteLine();
+                Console.WriteLine("BreakTime: " + States.pauseTime);
+                Console.WriteLine("WorkTime: " + States.workTime);
                 Console.WriteLine("switch to active");
+
                 ManageCSV.Save(date, path);
                 ManageCSV.WriteCsvLine(path);
                 ManageCSV.WriteCsvLine(path);
                 States.pauseTime = TimeSpan.Zero;
                 currentState = State.Create;
+            }
+            else if (ManageCSV.save)
+            {
+                Console.WriteLine();
+                Console.WriteLine("BreakTime: " + States.pauseTime);
+                Console.WriteLine("WorkTime: " + States.workTime);
+                Console.WriteLine("auto saved while inactiv");
+
+                ManageCSV.Save(date, path);
+                ManageCSV.save = false;
             }
         }
     }

@@ -27,12 +27,7 @@ namespace ActivityMonitorProgram
 
         
         private static void TimerElapsed(object source, ElapsedEventArgs e)
-        {
-            Console.WriteLine("Start: " + States.startTime);
-            Console.WriteLine("End: " + States.endTime);
-            Console.WriteLine("BreakTime: " + States.pauseTime);
-            Console.WriteLine("WorkTime: " + States.workTime);
-            Console.WriteLine();
+        {   
             ManageCSV.save = true;
         }
 
@@ -43,7 +38,7 @@ namespace ActivityMonitorProgram
         public static void StartMousePosTimer()
         {
             System.Timers.Timer timer;
-            timer = new System.Timers.Timer(100);
+            timer = new System.Timers.Timer(200);
 
             // gibt dem Timer eine Anweisung
             timer.Elapsed += MousePosTimerElapsed;

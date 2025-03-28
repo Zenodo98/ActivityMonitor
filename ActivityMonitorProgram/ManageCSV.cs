@@ -25,11 +25,6 @@ namespace ActivityMonitorProgram
                     file.WriteLine("");
                 }
             }
-
-            if (States.firstLoop)
-            {
-                States.firstLoop = true;
-            }
         }
 
 
@@ -80,10 +75,10 @@ namespace ActivityMonitorProgram
         {
             ManageCSV.RemoveCsvLine(path);
             ManageCSV.WriteCsv(path, date.ToString("dd-MM-yyyy"));
-            ManageCSV.WriteCsv(path, Globals.startTime.ToString());
-            ManageCSV.WriteCsv(path, Globals.endTime.ToString());
-            ManageCSV.WriteCsv(path, Globals.pauseTime.ToString());
-            ManageCSV.WriteCsv(path, Globals.workTime.ToString());
+            ManageCSV.WriteCsv(path, States.startTime.ToString());
+            ManageCSV.WriteCsv(path, States.endTime.ToString());
+            ManageCSV.WriteCsv(path, States.pauseTime.ToString());
+            ManageCSV.WriteCsv(path, States.workTime.ToString());
         }
     }
 }
