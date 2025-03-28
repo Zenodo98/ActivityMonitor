@@ -38,7 +38,7 @@ namespace ActivityMonitorProgram
         public static void StartMousePosTimer()
         {
             System.Timers.Timer timer;
-            timer = new System.Timers.Timer(200);
+            timer = new System.Timers.Timer(1000);
 
             // gibt dem Timer eine Anweisung
             timer.Elapsed += MousePosTimerElapsed;
@@ -50,7 +50,8 @@ namespace ActivityMonitorProgram
 
         private static void MousePosTimerElapsed(object source, ElapsedEventArgs e)
         {
-            CursorPosition.previousMouse = CursorPosition.GetCursorPosition();
+            CursorPosition.previousMouseX = CursorPosition.GetCursorPosition().X;
+            CursorPosition.previousMouseY = CursorPosition.GetCursorPosition().Y;
         }
 
     }

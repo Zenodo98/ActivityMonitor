@@ -64,7 +64,9 @@ namespace ActivityMonitorProgram
         /// </summary>
         /// <param name="time">Systemzeit</param>
         public static void Reset(TimeSpan time)
-        {   
+        {
+
+            States.startTime = time;
             //zweite Zeit für die Difference Methode
             States.secondAfkTime = time;
             currentState = State.Active;
@@ -78,7 +80,8 @@ namespace ActivityMonitorProgram
         /// <param name="time">Systemzeit</param>
         public static void Active(DateTime date, string path, TimeSpan time)
         {
-            CursorPosition.currentMouse = CursorPosition.GetCursorPosition();
+            CursorPosition.currentMouseX = CursorPosition.GetCursorPosition().X;
+            CursorPosition.currentMouseY = CursorPosition.GetCursorPosition().Y;
 
             States.startTime = time;
 
@@ -120,7 +123,7 @@ namespace ActivityMonitorProgram
                 ManageCSV.Save(date, path);
                 ManageCSV.save = false;
             }
-            else if (CursorPosition.DifferentMousePosition(CursorPosition.previousMouse, CursorPosition.currentMouse))
+            else if (CursorPosition.currentMouseX != CursorPosition.previousMouseX & CursorPosition.currentMouseY != CursorPosition.previousMouseY)
             {
                 currentState = State.Reset;
             }
@@ -132,6 +135,8 @@ namespace ActivityMonitorProgram
                 Console.WriteLine("switch to inactive");
 
                 States.workTime = Difference(States.startTime, States.endTime).Add(-Settings.pausePuffer);
+                CursorPosition.previousMouseX = CursorPosition.GetCursorPosition().X;
+                CursorPosition.previousMouseY = CursorPosition.GetCursorPosition().Y;
                 currentState = State.Inactive;
             }
         }
@@ -144,7 +149,8 @@ namespace ActivityMonitorProgram
         /// <param name="time">Systemzeit</param>
         public static void Inactive(DateTime date, string path, TimeSpan time)
         {
-            CursorPosition.currentMouse = CursorPosition.GetCursorPosition();
+            CursorPosition.currentMouseX = CursorPosition.GetCursorPosition().X;
+            CursorPosition.currentMouseY = CursorPosition.GetCursorPosition().Y;
 
             States.endTime = time;
 
@@ -164,7 +170,8 @@ namespace ActivityMonitorProgram
                 ManageCSV.Save(date, path);
                 currentState = State.Create;
             }
-            else if (CursorPosition.DifferentMousePosition(CursorPosition.previousMouse, CursorPosition.currentMouse))
+            else if (CursorPosition.currentMouseX <= CursorPosition.previousMouseX - 50 || CursorPosition.currentMouseX >= CursorPosition.previousMouseX + 50 &
+                CursorPosition.currentMouseY <= CursorPosition.previousMouseY - 50 || CursorPosition.currentMouseY >= CursorPosition.previousMouseY + 50)
             {
                 Console.WriteLine();
                 Console.WriteLine("BreakTime: " + States.pauseTime);

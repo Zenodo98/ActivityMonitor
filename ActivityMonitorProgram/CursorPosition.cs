@@ -10,9 +10,12 @@ namespace ActivityMonitorProgram
 {
     internal static class CursorPosition
     {
-        public static Point previousMouse;
-        public static Point currentMouse;
+        public static int previousMouseX;
+        public static int currentMouseX;
+        public static int previousMouseY;
+        public static int currentMouseY;
 
+        
         [StructLayout(LayoutKind.Sequential)]
         public struct PointInter
         {
@@ -32,21 +35,6 @@ namespace ActivityMonitorProgram
             PointInter lpPoint;
             GetCursorPos(out lpPoint);
             return (Point)lpPoint;
-        }
-
-        /// <summary>
-        /// Vergleich von Mauspositionen
-        /// </summary>
-        /// <param name="pos1">erste position</param>
-        /// <param name="pos2">zweite Position</param>
-        /// <returns>Wenn die Positionen nicht gleich sind, dann ist der Rückgabewert true</returns>
-        public static bool DifferentMousePosition(Point pos1, Point pos2)
-        {
-            if (pos1 == pos2)
-            {
-                return false;
-            }
-            return true;
         }
     }
 }
