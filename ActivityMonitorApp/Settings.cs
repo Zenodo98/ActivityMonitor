@@ -12,7 +12,7 @@ namespace ActivityMonitorApp
         public static int pausePufferMinutes = 5;
 
         //standard sind 5 Minuten
-        public static int autoSaveTime =5;
+        public static int autoSaveTime = 5;
 
         public static TimeSpan pausePuffer = new TimeSpan(00, pausePufferMinutes, 00);
     }
