@@ -31,7 +31,7 @@ namespace ActivityMonitorApp
         Timers OnTimeoutInaktiv = new Timers(1000 * 60 * Settings.pausePufferMinutes);
         Timers PrevMousePosTimer = new Timers(1000);
         Timers AutoSaveTimer = new Timers(1000 * 60 * Settings.autoSaveTime);
-        Timers OnTimeoutFullSave = new Timers(1000 * 10);
+        Timers OnTimeoutFullSave = new Timers(1000 * 20);
         Save SaveTimes = new Save();
 
         public StateMachine() 
