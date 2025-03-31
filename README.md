@@ -2,7 +2,7 @@
 
 Activity Monitor berechnet Pausenzeit und Arbeitszeit. Speichert die Daten als Block in eine Csv-Datei. 
 
-## Anmerkung
+### Anmerkung
 Die App funktioniert nicht während StandbyMode, deshalb hat man 20 Sekunden Zeit, nachdem der Standbymode vorbei ist, sich wieder einzuloggen.
 Erst nach 20 Sekunden wird eine vollständige Speicherung durchgeführt.
 
